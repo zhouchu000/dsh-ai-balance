@@ -26,12 +26,25 @@
 请为本机 DeepSeek Harness 安装 MiMo 余额插件：
 https://github.com/zhouchu000/dsh-mimo-balance
 
-1. 检查操作系统、Node.js 和 DeepSeek Harness 版本，确认当前后台使用的配置目录（profile）。
-2. 阅读仓库 README.md，将源码下载到用户目录下长期保留的位置。已有目录先检查来源和本地修改，不覆盖用户文件。
-3. 在插件目录运行 npm ci --ignore-scripts、npm run build、npm test 和 npm run check:release。Windows 使用 npm.cmd。
-4. 优先通过 DeepSeek Harness 的插件管理器安装并启用 link:绝对源码路径。若无法操作界面，确认对应后台已完全退出后，执行 npm run install:profile -- --profile "已确认的配置目录绝对路径"。已有同名插件指向不同目录时，使用插件管理器更换。
-5. 重新打开 DeepSeek Harness 并核对插件已启用。选中 MiMo 模型，检查模型名旁的总余额、点击详情和底部对话预估；切换其他提供商后余额应隐藏。
-6. 需要小米登录时打开插件登录窗口，由我在本机完成。报告已完成的检查；无法访问界面时明确说明界面验证尚未完成。
+1. 检查操作系统、Node.js 和 DeepSeek Harness 版本，
+   确认当前后台使用的配置目录（profile）。
+2. 阅读仓库 README.md，将源码保存到用户目录下长期保留的位置。
+   已有目录先检查来源和本地修改，不覆盖用户文件。
+3. 在插件目录依次运行：
+   npm ci --ignore-scripts
+   npm run build
+   npm test
+   npm run check:release
+   Windows 使用 npm.cmd。
+4. 优先通过插件管理器安装并启用 link:源码目录的绝对路径。
+   无法操作界面时，确认对应后台已完全退出，再运行：
+   npm run install:profile -- --profile "已确认的配置目录绝对路径"
+   同名插件指向不同目录时，使用插件管理器更换。
+5. 重新打开 DeepSeek Harness 并核对插件已启用。
+   选中 MiMo 模型，检查总余额、点击详情和已有对话的底部预估。
+   切换其他提供商后，余额应隐藏。
+6. 需要小米登录时打开插件登录窗口，由我在本机完成。
+   报告已完成的检查；无法访问界面时，说明界面验证尚未完成。
 ```
 
 命令行安装脚本会备份配置，并添加插件依赖、Bundle 声明和本地链接。默认目录为 `$DSH_HOME/profiles/desktop`；独立 Web 通常为 `$DSH_HOME/profiles/web`。自定义启动目录以实际配置为准，Agent 应显式传入 `--profile`。`DSH_HOME` 未设置时默认使用用户目录下的 `.dsh`。
