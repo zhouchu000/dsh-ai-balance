@@ -2,7 +2,7 @@
   "name": "dsh-mimo-balance",
   "version": "1.3.0",
   "private": true,
-  "description": "Xiaomi MiMo account balance and conversation usage estimates for DeepSeek Harness Desktop and local Web",
+  "description": "Xiaomi MiMo balance and usage estimates for DeepSeek Harness",
   "license": "MIT",
   "type": "module",
   "main": "./src/index.js",

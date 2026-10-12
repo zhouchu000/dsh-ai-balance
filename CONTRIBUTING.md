@@ -18,3 +18,11 @@ npm run check:release
 发布前只打包公开白名单文件，执行敏感信息检查，并在 `REVIEW.md` 如实记录自动化、实机和未验证范围。
 
 GitHub 仓库/源码 ZIP 必须包含锁文件、`.github`、源码及重建客户端。`npm pack` 默认会省略锁文件和部分仓库文件，不等价于本项目的源码交付包。`private: true` 用于避免意外发布到 npm，不妨碍 GitHub 开源；
+
+## 插件配置
+
+默认 Provider ID 为 `xiaomi`，自动识别 `baseURL` 指向 `https://api.xiaomimimo.com/...` 的自定义提供商。经代理接入时，在 `cordis.patch.yml` 的 `providerIds` 中追加准确 ID。OpenAI、Anthropic、DeepSeek 和已知 Token Plan 地址排除。
+
+登录优先使用本机 Chrome/Edge；缺少浏览器时运行 `npm run setup:browser`，或设置 `browserExecutable`。安装脚本会备份 profile 配置，并添加插件声明和本地链接；执行前应确认对应后台已退出。备用卸载命令为 `npm run uninstall:profile -- --profile "实际配置目录绝对路径"`。
+
+余额缓存位于 `$DSH_HOME/cache/dsh-mimo-balance/balance.json`，恢复缓存前验证会话身份。费用按调用时的提供商和模型归属，统计重试、摘要压缩和分支用量，价格核对日期为 2026-10-12；不含联网插件费用、优惠和历史价格变化。支持已确认价格的 MiMo-V2.5、V2.5-Pro、V2.6-Flash、V2.6-Pro 和 V2.6-Pro-UltraSpeed，以余额接口的 CNY/USD 币种计价。
