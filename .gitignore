@@ -1,0 +1,13 @@
+node_modules/
+.dsh/
+cache/
+coverage/
+.env
+.env.*
+**/.credentials*
+*.log
+*.zip
+*.tgz
+.mimo-balance-*
+.DS_Store
+Thumbs.db
