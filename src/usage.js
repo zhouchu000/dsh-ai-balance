@@ -44,7 +44,7 @@ function usageOf(event) {
 
 /** Official whole-log projection; only numerical accounting and route metadata leave the backend. */
 export const usageProjection = {
-  key: 'mimoConversationUsage', stateVersion: 2, stateSchema: { parse: validateState },
+  key: 'aiConversationUsage', stateVersion: 2, stateSchema: { parse: validateState },
   init: (_header, inherited = 0) => ({ inherited, route: null, rows: {}, last: null, overflow: false, view: { routes: [] } }),
   apply(state, event) {
     if (event.type === 'request/context' || event.type === 'request/header') {
