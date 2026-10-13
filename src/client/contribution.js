@@ -87,8 +87,15 @@ export function UsageContribution({ directory, controller, useProjection }) {
   const selected = React.useSyncExternalStore(subscribe, getDirectory);
   const usage = useProjection('aiConversationUsage');
   if (state.provider ? selected?.current?.provider !== state.provider.id : !isMiMoCurrent(selected, state.providerIds)) return null;
-  const quote = state.provider && state.provider.kind !== 'mimo' ? { text: '—', partial: true } : quoteUsage(usage, state.provider ? [state.provider.id] : state.providerIds, state.balance?.currency);
+  if (state.provider?.kind?.includes('plan')) {
+    const windows = state.balance?.type === 'quota' ? state.balance.windows : [];
+    const stale = windows.length && (state.stale || Date.now() - state.updatedAt >= REFRESH_MS);
+    const text = windows.length ? windows.map(w => `${w.label} ${Math.round((100 - w.remainingPercent) * 10) / 10}%`).join(' · ') : '—';
+    return h('span', { className: 'ai-usage-pill', 'data-ai-conversation-usage': '',
+      title: '账号套餐已用额度：' + text + (stale && state.updatedAt ? `；缓存于 ${new Date(state.updatedAt).toLocaleString('zh-CN')}` : '') },
+      '套餐已用 ', text, stale ? ' *' : '');
+  }
+  const quote = quoteUsage(usage, state.provider ? [state.provider] : state.providerIds, state.balance?.currency);
   return h('span', { className: 'ai-usage-pill', 'data-ai-conversation-usage': '',
-    title: '按对话 Token 估算' },
-    '预估用量 ', quote.text);
+    title: '本对话当前供应商 · 按官方 Token 价格估算' }, '预估用量 ', quote.text);
 }
