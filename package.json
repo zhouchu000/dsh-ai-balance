@@ -1,8 +1,8 @@
 {
-  "name": "dsh-mimo-balance",
-  "version": "1.3.0",
+  "name": "dsh-ai-balance",
+  "version": "2.0.0",
   "private": true,
-  "description": "Xiaomi MiMo balance and usage estimates for DeepSeek Harness",
+  "description": "Balance and plan usage for DeepSeek Harness",
   "license": "MIT",
   "type": "module",
   "main": "./src/index.js",
@@ -56,10 +56,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/zhouchu000/dsh-mimo-balance.git"
+    "url": "https://github.com/zhouchu000/dsh-ai-balance.git"
   },
-  "homepage": "https://github.com/zhouchu000/dsh-mimo-balance#readme",
+  "homepage": "https://github.com/zhouchu000/dsh-ai-balance#readme",
   "bugs": {
-    "url": "https://github.com/zhouchu000/dsh-mimo-balance/issues"
+    "url": "https://github.com/zhouchu000/dsh-ai-balance/issues"
   }
 }

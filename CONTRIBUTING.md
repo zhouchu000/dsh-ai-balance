@@ -1,8 +1,6 @@
-# 贡献说明
+# 开发说明
 
-本版的范围是余额查询与 Token 费用估算。请勿增加模型凭据管理、修改 DeepSeek Harness 核心、第三方转发或账户真实扣费推断。
-
-使用 Node >=22.19，在提交前运行：
+Node.js ≥22.19：
 
 ```sh
 npm ci --ignore-scripts
@@ -11,18 +9,29 @@ npm test
 npm run check:release
 ```
 
-行为变更需有对应的匿名测试，包括 Provider ID、币种、去重/刷新、鉴权和会话隔离。不得用真实账户凭据做 CI。修改源码后同时提交重建的 `lib/client.js` 与必要的锁文件更新。
+提交源码、锁文件和重建的 `lib/client.js`。测试使用匿名数据，覆盖 Provider 判断、币种与额度单位、凭据隔离、缓存、刷新和切换。未知字段或价格保留为未知。
 
-新增模型价格必须给出小米官方来源及核对日期；未确认字段与价格必须继续明确显示未知或部分，不能猜金额。Bug 报告只需系统、DeepSeek Harness/插件版本、脱敏复现步骤；不要提供整个 profile、凭据库、缓存或对话记录。
+## 结构
 
-发布前只打包公开白名单文件，执行敏感信息检查，并在 `REVIEW.md` 如实记录自动化、实机和未验证范围。
+- `providers.js`：Provider ID、官方端点及凭据引用映射。
+- `provider-auth.js`：读取 Harness 凭据，校验身份。
+- `provider-api.js`：固定接口与响应解析。
+- `registry.js`、`balance-service.js`：各供应商的请求与缓存。
+- `client/`：模型名旁总览、点击详情及对话预估。
 
-GitHub 仓库/源码 ZIP 必须包含锁文件、`.github`、源码及重建客户端。`npm pack` 默认会省略锁文件和部分仓库文件，不等价于本项目的源码交付包。`private: true` 用于避免意外发布到 npm，不妨碍 GitHub 开源；
+使用 Harness 官方 Bundle 与 UI slot，不修改核心或安装文件。缓存位于 `$DSH_HOME/cache/dsh-ai-balance/`。小米继续使用旧会话引用，便于升级。仅经明确 `providerIds` 配置兼容小米代理别名，其他自定义供应商要求官方端点。
 
-## 插件配置
+## 接口来源
 
-默认 Provider ID 为 `xiaomi`，自动识别 `baseURL` 指向 `https://api.xiaomimimo.com/...` 的自定义提供商。经代理接入时，在 `cordis.patch.yml` 的 `providerIds` 中追加准确 ID。OpenAI、Anthropic、DeepSeek 和已知 Token Plan 地址排除。
+- [DeepSeek 余额 API](https://api-docs.deepseek.com/zh-cn/api/get-user-balance/)：`GET /user/balance`，Bearer；保留 `balance_infos` 中各币种。
+- [Kimi 余额 API](https://platform.kimi.com/docs/api/balance)：`GET /v1/users/me/balance`，Bearer；国内 CNY、国际 USD，使用 `available_balance`。
+- [Kimi Code](https://github.com/MoonshotAI/kimi-code/blob/main/packages/oauth/src/managed-usage.ts)：`GET /coding/v1/usages`，Bearer；`usages.limit_*` 的 `used_ratio` 和 `reset_time`。密钥无权限时需要 Harness 中的有效登录；插件不代管 OAuth 刷新。
+- [GLM 官方查询脚本](https://github.com/zai-org/zai-coding-plugins/blob/main/plugins/glm-plan-usage/skills/usage-query-skill/scripts/query-usage.mjs)：`GET /api/monitor/usage/quota/limit`，原样 Authorization；读取 `limits` 的 `percentage`。
+- [智谱控制台](https://bigmodel.cn/)：前端使用 `/api/biz/account/query-customer-account-report`，读取 `availableBalance`。此接口可能要求控制台凭据；累计充值、赠送金额不能当作剩余额度。
+- [小米控制台](https://platform.xiaomimimo.com/)：Cookie 会话；按量余额 `/api/v1/balance`，套餐 `/api/v1/tokenPlan/usage`。套餐读取 `data.usage.items[].percent`，仅显示百分比。
 
-登录优先使用本机 Chrome/Edge；缺少浏览器时运行 `npm run setup:browser`，或设置 `browserExecutable`。安装脚本会备份 profile 配置，并添加插件声明和本地链接；执行前应确认对应后台已退出。备用卸载命令为 `npm run uninstall:profile -- --profile "实际配置目录绝对路径"`。
+以上来源核对日期：2026-10-13。MiMo Token 费用沿用 [官方价格](https://mimo.mi.com/docs/price)，核对日期 2026-10-12；只计算已确认型号与币种。
 
-余额缓存位于 `$DSH_HOME/cache/dsh-mimo-balance/balance.json`，恢复缓存前验证会话身份。费用按调用时的提供商和模型归属，统计重试、摘要压缩和分支用量，价格核对日期为 2026-10-12；不含联网插件费用、优惠和历史价格变化。支持已确认价格的 MiMo-V2.5、V2.5-Pro、V2.6-Flash、V2.6-Pro 和 V2.6-Pro-UltraSpeed，以余额接口的 CNY/USD 币种计价。
+安装脚本会备份 profile，再增量修改插件声明；执行时应退出后台。更换版本保留旧目录，不用整份旧配置覆盖用户后续修改。
+
+发布源码 ZIP 使用 `check:release` 的文件白名单，解压后独立构建、测试并核对客户端。`npm pack` 会省略锁文件等仓库文件，不能替代源码 ZIP。`private: true` 防止误发 npm，不影响 GitHub 开源。

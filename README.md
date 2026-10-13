@@ -1,13 +1,17 @@
-# DeepSeek Harness MiMo Balance
+# dsh-ai-balance
 
-DeepSeek Harness 的小米 MiMo 余额与用量查询插件。
+DeepSeek Harness 桌面版和本地 Web 的余额与套餐额度插件。
 
-## 功能
+随当前模型切换供应商，在模型名旁显示余额或剩余额度，点击查看详情和刷新。支持深浅主题，每五分钟自动刷新；切换到其他供应商后停止刷新。
 
-- 输入框旁显示MiMo账户总余额，单击可查看详细信息，余额每5分钟自动刷新。
-- 对话底部数据栏显示单对话费用估算。
-- 仅选中 MiMo 模型时显示，不影响其他模型使用。
-- 注：MiMo官网余额刷新有部分延迟(<5min)，为官方原因，无法避免。
+| 供应商 | 显示内容 | 认证 |
+| --- | --- | --- |
+| 小米 MiMo | 按量付费余额、Coding Plan 剩余百分比 | 本机小米网页登录 |
+| DeepSeek | API 余额、Harness 账号余额 | 已配置密钥或账号 |
+| Kimi | API 余额、Coding 套餐额度 | 已配置密钥或有效登录 |
+| GLM | 国内 API 余额、国内/国际 Coding Plan 额度 | 已配置凭据及查询权限 |
+
+零值或缺失的现金、赠金明细自动隐藏。接口权限与验证范围见 [验证记录](REVIEW.md)。
 
 ## 提示
 
@@ -17,68 +21,44 @@ MiMo新用户注册可以参与邀请活动，邀请/被邀请均可获得¥10�
 
 ## 安装
 
-适用于 DeepSeek Harness **0.2.0-rc.2**，需要 **Node.js >=22.19** 和已配置的 MiMo 模型。
+适用于 **DeepSeek Harness 0.2.0-rc.2**，需要 **Node.js ≥22.19**。
 
 ### 让 Agent 安装
 
-推荐直接使用DSH安装，只需输入下面提示词，完成后重启：
-
 ```text
-帮我给 DeepSeek Harness 安装这个插件：
-https://github.com/zhouchu000/dsh-mimo-balance
-按 README 安装并验证，保留现有配置。小米登录由我在本机完成。
+给 DeepSeek Harness 安装 https://github.com/zhouchu000/dsh-ai-balance
+按 README 安装、验证，保留现有配置。网页登录由我完成。
 ```
 
 ### 手动安装
 
-从「Code → Download ZIP」下载源码，解压到长期保留的目录。以下示例使用 `DeepSeek-Harness-plugins/dsh-mimo-balance`。
-
-**Windows（PowerShell）**
-
-```powershell
-Set-Location "$env:USERPROFILE\DeepSeek-Harness-plugins\dsh-mimo-balance"
-npm.cmd ci --ignore-scripts
-npm.cmd run build
-"link:" + (Get-Location).Path
-```
-
-**macOS（终端）**
+从「Code → Download ZIP」下载，解压到长期保留的目录。在该目录打开终端，执行：
 
 ```sh
-cd ~/DeepSeek-Harness-plugins/dsh-mimo-balance
 npm ci --ignore-scripts
 npm run build
-printf 'link:%s\n' "$PWD"
 ```
 
-在 DeepSeek Harness「插件 → 添加插件」粘贴输出的 `link:` 路径，安装并启用，然后完全退出重开。安装目录需要保留。
+Windows PowerShell 若限制运行 npm，使用 `npm.cmd`。在 DeepSeek Harness「插件 → 添加插件」输入 `link:插件目录的绝对路径`，安装并启用，然后完全退出重开。请保留源码目录。
 
-### 命令行安装
-
-无法操作插件界面时，退出对应后台，在插件目录执行（Windows 使用 `npm.cmd`）：
+命令行安装：先退出对应后台，再执行：
 
 ```sh
-npm run install:profile -- --profile "实际配置目录的绝对路径"
+npm run install:profile -- --profile "配置目录的绝对路径"
 ```
 
-配置目录通常是 `$DSH_HOME/profiles/desktop` 或 `$DSH_HOME/profiles/web`；`DSH_HOME` 默认是用户目录下的 `.dsh`。共用后台的桌面版和 Web 安装一次即可，独立后台分别安装。已有同名插件指向其他目录时，通过插件管理器更换。
+配置目录通常为用户目录下的 `.dsh/profiles/desktop` 或 `.dsh/profiles/web`；设置过 `DSH_HOME` 则以其为准。共用后台的桌面版和 Web 安装一次，独立后台分别安装。脚本会备份配置，并将旧版 `dsh-mimo-balance` 替换为新版。
 
 ## 使用
 
-在对话框选中插件，点击「余额 — → 登录小米账号」，在本机窗口登录。详情中可手动刷新、退出和重新登录。
+模型设置保留原有凭据。自定义模型按 Provider ID 和官方接口地址识别；GLM 国内、国际及按量/套餐地址需与实际账号一致。
 
-底部费用按 [MiMo 官方价格](https://mimo.mi.com/docs/price) 和消耗 Token 估算。
+MiMo 点击余额或额度，再选「登录小米账号」，在本机窗口完成登录。详情中可退出、重新登录。缺少 Chrome/Edge 时，执行 `npm run setup:browser`。
 
-## 卸载
+底部「预估用量」按对话 Token 和已确认价格计算，目前仅覆盖部分 MiMo 按量模型；其他模型显示「—」，缺少记录显示「部分」。
 
-在余额详情退出登录，再从插件管理器卸载并重启。换版本时保留旧源码目录，可重新安装其 `link:` 路径切回。
+## 卸载与回滚
 
-## 说明
+MiMo 可先在详情退出登录，再从插件管理器卸载并重启。命令行使用 `npm run uninstall:profile -- --profile "配置目录绝对路径"`。回滚时重新安装旧源码目录的 `link:` 路径，并停用新版。
 
-由于小米未开放公开余额查询接口，本项目使用小米官方非公开接口。
-
-需登录小米账号，存在一定风险（如无法正常使用、数值不正确等），开发者不承担任何风险。
-
-小米账号登录信息保存在本地
-
-MIT 许可证。开发及配置说明见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+MIT 许可证。[安全说明](SECURITY.md) · [开发说明](CONTRIBUTING.md) · [验证记录](REVIEW.md)。Windows 界面及交互登录尚未实机验收。
