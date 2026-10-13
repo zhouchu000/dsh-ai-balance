@@ -11,7 +11,6 @@ DeepSeek Harness 桌面版和本地 Web 的余额与套餐额度插件。
 | Kimi | API 余额、Coding 套餐额度 | 已配置密钥或有效登录 |
 | GLM | 国内 API 余额、国内/国际 Coding Plan 额度 | 已配置凭据及查询权限 |
 
-零值或缺失的现金、赠金明细自动隐藏。接口权限与验证范围见 [验证记录](REVIEW.md)。
 
 ## 提示
 
@@ -61,4 +60,4 @@ MiMo 点击余额或额度，再选「登录小米账号」，在本机窗口完
 
 MiMo 可先在详情退出登录，再从插件管理器卸载并重启。命令行使用 `npm run uninstall:profile -- --profile "配置目录绝对路径"`。回滚时重新安装旧源码目录的 `link:` 路径，并停用新版。
 
-MIT 许可证。[安全说明](SECURITY.md) · [开发说明](CONTRIBUTING.md) · [验证记录](REVIEW.md)。Windows 界面及交互登录尚未实机验收。
+MIT 许可证。[安全说明](SECURITY.md) · [开发说明](CONTRIBUTING.md) 
