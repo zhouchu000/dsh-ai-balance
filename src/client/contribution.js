@@ -90,7 +90,7 @@ export function UsageContribution({ directory, controller, useProjection }) {
   if (state.provider?.kind?.includes('plan')) {
     const windows = state.balance?.type === 'quota' ? state.balance.windows : [];
     const stale = windows.length && (state.stale || Date.now() - state.updatedAt >= REFRESH_MS);
-    const text = windows.length ? windows.map(w => `${w.label} ${Math.round((100 - w.remainingPercent) * 10) / 10}%`).join(' · ') : '—';
+    const text = windows.length ? windows.map(w => `${w.label} ${Math.round((w.usedPercent ?? 100 - w.remainingPercent) * 10) / 10}%`).join(' · ') : '—';
     return h('span', { className: 'ai-usage-pill', 'data-ai-conversation-usage': '',
       title: '账号套餐已用额度：' + text + (stale && state.updatedAt ? `；缓存于 ${new Date(state.updatedAt).toLocaleString('zh-CN')}` : '') },
       '套餐已用 ', text, stale ? ' *' : '');
