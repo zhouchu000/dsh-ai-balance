@@ -54,7 +54,7 @@ npm run install:profile -- --profile "配置目录的绝对路径"
 
 MiMo 点击余额或额度，再选「登录小米账号」，在本机窗口完成登录。详情中可退出、重新登录。缺少 Chrome/Edge 时，执行 `npm run setup:browser`。
 
-底部「预估用量」按对话 Token 和已确认价格计算，目前仅覆盖部分 MiMo 按量模型；其他模型显示「—」，缺少记录显示「部分」。
+底部「预估用量」显示本对话当前供应商的 Token 费用，支持 MiMo、DeepSeek、Kimi 和 GLM 的已定价模型。Coding Plan 显示「套餐已用」百分比，按账号和周期统计。
 
 ## 卸载与回滚
 
