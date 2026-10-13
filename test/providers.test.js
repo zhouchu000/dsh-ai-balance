@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { discoverProviders } from '../src/providers.js';
-import { parseProviderBalance, queryProviderBalance, parseAccountBalance } from '../src/provider-api.js';
+import { parseProviderBalance, queryProviderBalance, parseAccountBalance, validateBalance } from '../src/provider-api.js';
 import { ProviderAuth } from '../src/provider-auth.js';
 
 const describe = providers => [{ ns: 'llm-pi-ai', value: { providers } }];
@@ -114,4 +114,13 @@ test('missing or coerced quota ratios never appear as unused quota', () => {
     assert.throws(() => parseProviderBalance('mimo-plan', { code: 0, data: { usage: { items: [{ name: 'total_token', percent, limit: 100 }] } } }), { code: 'unreadable' });
     assert.throws(() => parseProviderBalance('kimi-plan', { usages: { limit_5h: { used_ratio: percent } } }), { code: 'unreadable' });
   }
+});
+
+test('consumed quota preserves reported over-limit percentages through cache validation', () => {
+  const result = parseProviderBalance('kimi-plan', { usages: { limit_5h: { used_ratio: 1.254 } } });
+  assert.equal(result.windows[0].remainingPercent, 0);
+  assert.equal(validateBalance(JSON.parse(JSON.stringify(result))).windows[0].usedPercent, 125.4);
+  const rounded = parseProviderBalance('kimi-plan', { usages: { limit_5h: { used_ratio: 0.0005 } } });
+  assert.equal(rounded.windows[0].usedPercent, 0.1);
+  assert.equal(rounded.windows[0].remainingPercent, 99.9);
 });

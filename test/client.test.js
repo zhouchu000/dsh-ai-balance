@@ -304,6 +304,9 @@ test('Coding Plan shows account quota consumed with period labels and stale time
     env.setPayload({ ...env.controller.getSnapshot(), stale: true, status: 'network', updatedAt: Date.now() - 600000 });
     await env.settle(() => { void env.controller.refresh({ force: true }); });
     assert.match(holder.textContent, /\*$/); assert.match(holder.firstChild.title, /缓存于/);
+    env.setPayload({ ...env.controller.getSnapshot(), balance: { type: 'quota', windows: [{ label: '5小时', remainingPercent: 0, usedPercent: 125.4 }] }, stale: false, updatedAt: Date.now() });
+    await env.settle(() => { void env.controller.refresh({ force: true }); });
+    assert.equal(holder.textContent, '套餐已用 5小时 125.4%');
     env.setPayload({ ...env.controller.getSnapshot(), balance: null, status: 'invalid_key' });
     await env.settle(() => { void env.controller.refresh({ force: true }); });
     assert.equal(holder.textContent, '套餐已用 —');
