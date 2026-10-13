@@ -259,7 +259,7 @@ test('production pool renders only the selected provider across balances, plans 
 });
 
 test('providers without verified prices show unknown estimate even when the projection is empty', async () => {
-  const env = await setup('deepseek', { ...good(), provider: { id: 'deepseek', kind: 'deepseek', label: 'DeepSeek' } }, { open: false });
+  const env = await setup('unknown', { ...good(), provider: { id: 'unknown', kind: 'unknown', label: 'Unknown' } }, { open: false });
   const holder = document.createElement('div'); document.body.appendChild(holder); const root = createRoot(holder);
   try {
     await env.settle(() => root.render(h(UsageContribution, { directory: env.directory, controller: env.controller, useProjection: () => ({ routes: [] }) })));
@@ -281,4 +281,31 @@ test('cash and gift rows are hidden when absent or zero while the total remains 
     text = document.querySelector('[data-ai-balance]').textContent;
     assert.match(text, /赠金余额：¥1.25/); assert.ok(!text.includes('现金余额'));
   } finally { await env.cleanup(); }
+});
+
+test('API cost remains available without a balance login and switches with the current provider', async () => {
+  const env = await setup('custom-glm', { ...good(), status: 'invalid_key', balance: null, provider: { id: 'custom-glm', kind: 'glm', label: 'GLM' } }, { open: false });
+  const holder = document.createElement('div'); document.body.appendChild(holder); const root = createRoot(holder);
+  const view = { routes: [{ provider: 'custom-glm', model: 'glm-5.3', input: 1000000, output: 100000, cacheRead: 1000000, cacheWrite: 0, samples: 1, missing: 0 }] };
+  try {
+    await env.settle(() => root.render(h(UsageContribution, { directory: env.directory, controller: env.controller, useProjection: () => view })));
+    assert.equal(holder.textContent, '预估用量 ¥12.80');
+    await env.settle(() => env.directory.store.update(current('openai')));
+    assert.equal(holder.textContent, '');
+  } finally { await act(async () => root.unmount()); await env.cleanup(); }
+});
+test('Coding Plan shows account quota consumed with period labels and stale timestamp, never conversation money', async () => {
+  const env = await setup('kimi', { ...good(), provider: { id: 'kimi', kind: 'kimi-plan', label: 'Kimi' }, balance: { type: 'quota', windows: [
+    { label: '5小时', remainingPercent: 74.6 }, { label: '7天', remainingPercent: 92 } ] } }, { open: false });
+  const holder = document.createElement('div'); document.body.appendChild(holder); const root = createRoot(holder);
+  try {
+    await env.settle(() => root.render(h(UsageContribution, { directory: env.directory, controller: env.controller, useProjection: () => ({ routes: [] }) })));
+    assert.equal(holder.textContent, '套餐已用 5小时 25.4% · 7天 8%');
+    env.setPayload({ ...env.controller.getSnapshot(), stale: true, status: 'network', updatedAt: Date.now() - 600000 });
+    await env.settle(() => { void env.controller.refresh({ force: true }); });
+    assert.match(holder.textContent, /\*$/); assert.match(holder.firstChild.title, /缓存于/);
+    env.setPayload({ ...env.controller.getSnapshot(), balance: null, status: 'invalid_key' });
+    await env.settle(() => { void env.controller.refresh({ force: true }); });
+    assert.equal(holder.textContent, '套餐已用 —');
+  } finally { await act(async () => root.unmount()); await env.cleanup(); }
 });
