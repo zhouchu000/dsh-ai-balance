@@ -35,7 +35,9 @@ export function validateBalance(value) {
     if (!Array.isArray(value.windows) || !value.windows.length || value.windows.length > 12) throw balanceError('unreadable');
     return { type: 'quota', windows: value.windows.map(w => {
       if (typeof w.label !== 'string' || w.label.length > 40 || !Number.isFinite(w.remainingPercent) || w.remainingPercent < 0 || w.remainingPercent > 100) throw balanceError('unreadable');
+      if (w.usedPercent !== undefined && (!Number.isFinite(w.usedPercent) || w.usedPercent < 0 || Math.abs(Math.max(0, Math.round((100 - w.usedPercent) * 10) / 10) - w.remainingPercent) > 0.000001)) throw balanceError('unreadable');
       return { label: w.label, remainingPercent: w.remainingPercent,
+        ...(w.usedPercent === undefined ? {} : { usedPercent: w.usedPercent }),
         ...(Number.isSafeInteger(w.resetAt) && w.resetAt > 0 ? { resetAt: w.resetAt } : {}) };
     }) };
   }
@@ -54,24 +56,25 @@ const group = rows => { if (!rows.length) throw balanceError('unreadable'); retu
 export function parseProviderBalance(kind, body) {
   const remaining = used => {
     if (typeof used !== 'number' || !Number.isFinite(used) || used < 0) throw balanceError('unreadable');
-    return Math.max(0, Math.round((100 - used) * 10) / 10);
+    const usedPercent = Math.round(used * 10) / 10;
+    return { remainingPercent: Math.max(0, Math.round((100 - usedPercent) * 10) / 10), usedPercent };
   };
   const ratio = value => { if (typeof value !== 'number') throw balanceError('unreadable'); return remaining(value * 100); };
   const reset = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:\d{2})$/.test(value) ? Date.parse(value) : undefined;
   if (kind === 'kimi-plan' || kind === 'kimi-plan-intl') {
     const labels = { limit_5h: '5小时', limit_7d: '7天', limit_month_total: '月度', limit_month_code: '编程月度' };
     return validateBalance({ type: 'quota', windows: Object.entries(labels).filter(([key]) => body?.usages?.[key] !== undefined)
-      .map(([key, label]) => ({ label, remainingPercent: ratio(body.usages[key].used_ratio), resetAt: reset(body.usages[key].reset_time) })) });
+      .map(([key, label]) => ({ label, ...ratio(body.usages[key].used_ratio), resetAt: reset(body.usages[key].reset_time) })) });
   }
   if (kind === 'glm-plan' || kind === 'glm-plan-intl') {
     if (body?.code !== 200 || body.success !== true || !Array.isArray(body.data?.limits)) throw balanceError('unreadable');
     return validateBalance({ type: 'quota', windows: body.data.limits.filter(x => ['TOKENS_LIMIT', 'TIME_LIMIT'].includes(x.type))
-      .map(x => ({ label: x.type === 'TOKENS_LIMIT' ? '5小时' : 'MCP', remainingPercent: remaining(x.percentage) })) });
+      .map(x => ({ label: x.type === 'TOKENS_LIMIT' ? '5小时' : 'MCP', ...remaining(x.percentage) })) });
   }
   if (kind === 'mimo-plan') {
     if (body?.code !== 0 || !Array.isArray(body.data?.usage?.items)) throw balanceError('unreadable');
     return validateBalance({ type: 'quota', windows: body.data.usage.items.filter(x => x.limit !== 0)
-      .map(x => ({ label: x.name === 'compensation_total_token' ? '补偿额度' : '套餐额度', remainingPercent: ratio(x.percent) })) });
+      .map(x => ({ label: x.name === 'compensation_total_token' ? '补偿额度' : '套餐额度', ...ratio(x.percent) })) });
   }
   if (kind === 'deepseek') {
     if (typeof body?.is_available !== 'boolean' || !Array.isArray(body.balance_infos)) throw balanceError('unreadable');
