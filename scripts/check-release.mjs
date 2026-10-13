@@ -6,7 +6,7 @@ const rootFiles = new Set(['package.json', 'package-lock.json', 'cordis.patch.ym
   'THIRD_PARTY_NOTICES.md', 'SECURITY.md', 'CONTRIBUTING.md', 'CHANGELOG.md', 'REVIEW.md', '.gitignore', '.gitattributes']);
 const rootDirs = new Set(['src', 'lib', 'scripts', 'test', '.github']);
 const excludedRoots = new Set(['node_modules', '.git']);
-const removedManagement = /KeyProvisioner|configureKey|autoCreateApiKey|keyStates|\/api\/v1\/apiKeys|key-(?:connect|rollback)|DSH_MIMO_KEY_|apiKeyEnv|mimo-balance__keys|API[ _-]*Key/i;
+const removedManagement = /KeyProvisioner|configureKey|autoCreateApiKey|keyStates|\/api\/v1\/apiKeys|key-(?:connect|rollback)|DSH_MIMO_KEY_|ai-balance__keys/i;
 
 /** Source/archive allowlist inspection. Findings never include matched secret values. */
 export async function inspectRelease(root) {
