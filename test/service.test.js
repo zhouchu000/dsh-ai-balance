@@ -69,3 +69,16 @@ test('startup never publishes disk amounts until the console identity is verifie
     assert.equal(stale.balance.total, '28.56'); assert.equal(stale.status, 'expired'); assert.equal(stale.stale, true);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
+
+test('changing the configured credential invalidates a fresh cache before the throttle gate', async () => {
+  let identity = 'first', value = '1.00';
+  const service = new BalanceService(options({ auth: { load: async () => ({ apiKey: 'fixture', identity }) }, query: async s => { assert.equal(s.apiKey, 'fixture'); return { total: value, currency: 'USD' }; } }));
+  await service.refresh(); identity = 'second'; value = '2.00';
+  const next = await service.refresh(); assert.equal(next.balance.total, '2.00');
+});
+test('credential switch during an upstream request discards the previous account response', async () => {
+  let identity = 'first', finish;
+  const service = new BalanceService(options({ auth: { load: async () => ({ identity }) }, query: () => new Promise(r => { finish = r; }) }));
+  const request = service.refresh(); await new Promise(r => setImmediate(r)); identity = 'second'; finish(balance);
+  assert.equal((await request).balance, null);
+});

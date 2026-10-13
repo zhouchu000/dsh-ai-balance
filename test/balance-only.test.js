@@ -13,7 +13,7 @@ test('plugin exposes only balance and console-session routes without touching mo
   };
   try {
     apply({ inject: (_names, register) => register(ctx) });
-    assert.deepEqual(paths.sort(), ['/dsh-mimo-balance/login', '/dsh-mimo-balance/logout', '/dsh-mimo-balance/refresh', '/dsh-mimo-balance/state']);
+    assert.deepEqual(paths.sort(), ['/dsh-ai-balance/login', '/dsh-ai-balance/logout', '/dsh-ai-balance/refresh', '/dsh-ai-balance/state']);
   } finally { disposers.reverse().forEach(dispose => dispose?.()); }
 });
 

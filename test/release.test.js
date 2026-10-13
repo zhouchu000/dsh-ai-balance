@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 async function fixture() {
   const root = await mkdtemp(join(tmpdir(), 'mimo-public-'));
   await mkdir(join(root, 'src')); await mkdir(join(root, 'lib'));
-  for (const [name, text] of Object.entries({ 'package.json': '{"name":"dsh-mimo-balance"}', 'package-lock.json': '{}',
+  for (const [name, text] of Object.entries({ 'package.json': '{"name":"dsh-ai-balance"}', 'package-lock.json': '{}',
     'README.md': 'Anonymous public documentation', LICENSE: 'MIT', 'cordis.patch.yml': '[]', 'src/index.js': 'export const apply = () => {};',
     'lib/client.js': '/* anonymous generated client */' })) await writeFile(join(root, name), text);
   return root;
